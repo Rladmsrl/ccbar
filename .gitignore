@@ -1,0 +1,68 @@
+# === Xcode === #
+DerivedData/
+build/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/
+*.xcworkspace/xcuserdata/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.hmap
+*.dSYM
+*.dSYM.zip
+xcuserdata/
+
+# === XcodeGen === #
+# ClaudeStats.xcodeproj is generated from project.yml via `xcodegen generate`.
+ClaudeStats.xcodeproj/
+
+# === Swift Package Manager === #
+.build/
+.swiftpm/
+Package.resolved
+
+# === macOS === #
+.DS_Store
+._*
+*.swp
+*~
+
+# === Credentials / env === #
+.env
+.env.*
+*.pem
+*.p12
+*.key
+
+# === Claude Code agent config (local, not part of the project) === #
+.claude/
+
+# === Agent skills (project-local AI tooling, not project source) === #
+.agents/
+
+# === Release artifacts === #
+dist/
+
+# === Generated Ghostty embedding resources === #
+GhosttyEmbed/Resources/*
+!GhosttyEmbed/Resources/.gitkeep
+
+# === Generated language-stat runtime resources === #
+ClaudeStats/Resources/GitTools/bin/*
+ClaudeStats/Resources/GitTools/gems/*
+ClaudeStats/Resources/GitTools/runtime/*
+ClaudeStats/Resources/GitTools/manifest.json
+!ClaudeStats/Resources/GitTools/bin/.gitkeep
+
+# === Misc === #
+*.log
+*.orig
+
+# === Local tooling (do not commit) === #
+.codegraph/
+.codex/
+.cursor/
+.tools/
+.superpowers/
+AGENTS.md

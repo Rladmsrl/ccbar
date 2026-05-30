@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<title>CCBar · Floating Tab · Palette Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #f5f3ee;
+    --ink-dim: #9b9690;
+    --ink-fainter: #56524d;
+    --rule: #2a2724;
+    --paper: #0d0b09;
+    --paper-warm: #14110e;
+    --desktop: #1a1714;
+    --danger: #ff3b30;
+    --serif: 'Instrument Serif', 'Times New Roman', serif;
+    --mono: 'Geist Mono', ui-monospace, 'SF Mono', monospace;
+    --body: 'Geist', -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scrollbar-color: #2a2724 #0d0b09; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 1.55;
+    background-image:
+      radial-gradient(ellipse at 12% -5%, rgba(255, 159, 28, 0.04), transparent 45%),
+      radial-gradient(ellipse at 88% 105%, rgba(54, 162, 235, 0.05), transparent 50%);
+    background-attachment: fixed;
+  }
+  ::selection { background: rgba(255, 159, 28, 0.3); }
+  .frame {
+    max-width: 1480px;
+    margin: 0 auto;
+    padding: 88px 56px 120px;
+  }
+
+  /* MASTHEAD */
+  .masthead {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 40px;
+    align-items: end;
+    margin-bottom: 56px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .marque {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-dim);
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .marque .pip { width: 6px; height: 6px; background: #FFC107; border-radius: 50%; box-shadow: 0 0 8px rgba(255,193,7,0.5); }
+  .masthead h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-style: italic;
+    font-size: clamp(48px, 6vw, 84px);
+    line-height: 1;
+    letter-spacing: -0.015em;
+    margin: 18px 0 0;
+  }
+  .masthead h1 em {
+    font-style: normal;
+    font-family: var(--body);
+    font-weight: 300;
+    letter-spacing: -0.005em;
+  }
+  .masthead .meta {
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-fainter);
+    letter-spacing: 0.05em;
+  }
+  .masthead .meta strong {
+    color: var(--ink-dim);
+    font-weight: 500;
+  }
+
+  /* BRIEF */
+  .brief {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 56px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .brief h2 {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 28px;
+    margin: 0 0 14px;
+    line-height: 1.15;
+  }
+  .brief p {
+    margin: 0 0 12px;
+    color: var(--ink-dim);
+  }
+  .brief code {
+    font-family: var(--mono);
+    color: var(--ink);
+    font-size: 12.5px;
+  }
+  .kicker {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-fainter);
+    margin-bottom: 10px;
+  }
+
+  /* VARIANT GRID */
+  .variants {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 48px;
+  }
+
+  .variant {
+    border: 1px solid var(--rule);
+    background: linear-gradient(180deg, rgba(255,255,255,0.012), transparent 30%), var(--paper-warm);
+    overflow: hidden;
+  }
+  .variant header {
+    padding: 28px 32px 22px;
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+    align-items: end;
+  }
+  .variant .numero {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 52px;
+    line-height: 0.85;
+    letter-spacing: -0.025em;
+  }
+  .variant .name {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 34px;
+    line-height: 1;
+    margin-top: 6px;
+    letter-spacing: -0.015em;
+  }
+  .variant .codename {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-fainter);
+  }
+  .variant .one-line {
+    grid-column: 1 / -1;
+    margin-top: 12px;
+    color: var(--ink-dim);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* SWATCH ROW */
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .swatch {
+    height: 88px;
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: rgba(255,255,255,0.95);
+    font-family: var(--mono);
+    border-right: 1px solid rgba(0,0,0,0.25);
+  }
+  .swatch:last-child { border-right: none; }
+  .swatch .swatch-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+  .swatch .swatch-hex {
+    font-size: 10.5px;
+    font-weight: 500;
+    opacity: 0.92;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+  }
+
+  /* TAB DEMO STAGE */
+  .stage {
+    padding: 36px 32px 28px;
+    background:
+      radial-gradient(ellipse at 50% 70%, rgba(54, 162, 235, 0.05), transparent 65%),
+      #0a0907;
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 28px;
+    align-items: center;
+  }
+  .stage .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-fainter);
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    text-align: center;
+  }
+
+  /* THE TAB ITSELF */
+  .tab-zoom {
+    width: 80px;
+    height: 200px;
+    position: relative;
+    margin: 0 auto;
+  }
+  .tab-zoom .ribbon {
+    background: rgba(20, 17, 14, 0.7);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border-radius: 6px 0 0 6px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    box-shadow:
+      inset 1px 0 0 rgba(255,255,255,0.04),
+      -2px 0 16px rgba(0,0,0,0.4);
+  }
+  .seg {
+    flex: 1;
+    border-bottom: 1px solid rgba(0,0,0,0.45);
+    position: relative;
+  }
+  .seg:last-child { border-bottom: 0; }
+
+  /* gradient mixer for each color — uses CSS var */
+  .seg[data-color] {
+    background: linear-gradient(
+      90deg,
+      var(--seg-color, transparent) 0%,
+      transparent 100%);
+  }
+
+  /* state-comparison row layout */
+  .tab-stack-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    flex: 1;
+  }
+  .stack-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .stack-cell .stack-label {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-fainter);
+    text-align: center;
+  }
+  .stack-cell .stack-label strong {
+    color: var(--ink-dim);
+    font-weight: 500;
+    display: block;
+    font-size: 10.5px;
+  }
+  .stack-cell .tab-zoom {
+    height: 220px;
+  }
+
+  /* sub-component: needsInput pulse */
+  .seg.needs {
+    animation: needsPulse 0.9s ease-in-out infinite;
+  }
+  @keyframes needsPulse {
+    0%, 100% { filter: brightness(1); opacity: 1; }
+    50% { filter: brightness(1.2); opacity: 0.95; }
+  }
+
+  /* notes */
+  .notes {
+    padding: 24px 32px 28px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    background: rgba(255,255,255,0.005);
+  }
+  .notes h4 {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-fainter);
+    margin: 0 0 8px;
+    font-weight: 500;
+  }
+  .notes p, .notes ul {
+    margin: 0;
+    color: var(--ink-dim);
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+  .notes ul {
+    padding-left: 16px;
+  }
+  .notes li { margin-bottom: 4px; }
+  .notes li::marker { color: var(--ink-fainter); }
+
+  /* footer */
+  .footnote {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    color: var(--ink-fainter);
+  }
+  .footnote .right { text-align: right; }
+
+  @media (max-width: 1100px) {
+    .frame { padding: 56px 24px 88px; }
+    .variants { grid-template-columns: 1fr; }
+    .brief { grid-template-columns: 1fr; gap: 28px; }
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <!-- MASTHEAD -->
+  <header class="masthead">
+    <div>
+      <div class="marque"><span class="pip"></span> CCBar · Floating Tab · Palette Brief №02</div>
+      <h1>橙色 <em>跟</em> 绿色<br>得分得开</h1>
+    </div>
+    <div class="meta">
+      Today &middot; <strong>2026-05-28</strong><br>
+      Mockup &middot; <strong>current + 3 variants</strong><br>
+      Render &middot; <strong>4× retina @ tab native gradient</strong>
+    </div>
+  </header>
+
+  <!-- BRIEF -->
+  <section class="brief">
+    <div>
+      <div class="kicker">问题</div>
+      <h2>"橙色 working 跟绿色 attention 不好区分"</h2>
+      <p>现在的两个色 (<code>#FF9F1C</code> 橙 & <code>#40C864</code> 绿) 在 saturated 端
+        色相分得开,但放到 36×~22pt 折叠条段里走 0.85→0.15 alpha 渐变后, 在
+        gradient 衰减端的亮度跟饱和度都拉平,只剩色相对比 — 而色相对比在
+        peripheral vision 里又不如亮度差敏感, 就糊到一起了。</p>
+      <p>另外两组潜在冲突也顺便审一下:<br>
+        — <code>thinking</code> blue (200°) 跟 <code>sweeping</code> cyan (190°) 只差 10°,都是冷色<br>
+        — <code>working</code> orange (32°) 跟 <code>error</code> red (3°) 都是暖色,fade 端容易混</p>
+    </div>
+    <div>
+      <div class="kicker">设计目标</div>
+      <h2>三层差异: 色相 · 亮度 · 饱和</h2>
+      <p>每对状态色都应该靠 <strong>至少 2 层</strong> 拉开距离 (色相 + 亮度 / 色相 + 饱和 /
+        亮度 + 饱和),不能只靠 hue。小尺寸渐变下亮度差最稳。</p>
+      <p>语义约束保留:<br>
+        — error 必须红 (universal)<br>
+        — working 是暖色(active/energetic)<br>
+        — thinking 是冷色(cerebral)<br>
+        — attention 是"完成-看我"信号(可以走 cool 不走 grass green)<br>
+        — juggling 是 multitask(紫色/品红族)<br>
+        — sweeping 是 compaction(中性/灰蓝)</p>
+    </div>
+  </section>
+
+  <!-- VARIANTS -->
+  <main class="variants">
+
+    <!-- ===========================================
+         CURRENT (baseline) — show the bug
+         =========================================== -->
+    <article class="variant">
+      <header>
+        <div>
+          <div class="codename">CURRENT · baseline</div>
+          <div class="name"><em>As-is</em></div>
+        </div>
+        <div class="numero">00</div>
+        <p class="one-line">今天 ship 的 6 色。orange 跟 green 的亮度几乎一样,fade 端只剩色相差。
+          thinking 跟 sweeping 也太靠近。</p>
+      </header>
+      <div class="swatches">
+        <div class="swatch" style="background:#36A2EB"><span class="swatch-label">thinking</span><span class="swatch-hex">#36A2EB</span></div>
+        <div class="swatch" style="background:#FF9F1C"><span class="swatch-label">working</span><span class="swatch-hex">#FF9F1C</span></div>
+        <div class="swatch" style="background:#AF50DC"><span class="swatch-label">juggling</span><span class="swatch-hex">#AF50DC</span></div>
+        <div class="swatch" style="background:#40C864"><span class="swatch-label">attention</span><span class="swatch-hex">#40C864</span></div>
+        <div class="swatch" style="background:#73B4C8"><span class="swatch-label">sweeping</span><span class="swatch-hex">#73B4C8</span></div>
+        <div class="swatch" style="background:#FF3B30"><span class="swatch-label">error</span><span class="swatch-hex">#FF3B30</span></div>
+      </div>
+      <div class="stage">
+        <div class="label">All 6 + needs</div>
+        <div class="tab-stack-grid">
+          <div class="stack-cell">
+            <div class="tab-zoom">
+              <div class="ribbon">
+                <div class="seg" style="--seg-color:rgba(54,162,235,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(255,159,28,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(175,80,220,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(64,200,100,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(115,180,200,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(255,59,48,0.85)" data-color></div>
+              </div>
+            </div>
+            <div class="stack-label"><strong>6 states</strong>top→bottom</div>
+          </div>
+          <div class="stack-cell">
+            <div class="tab-zoom">
+              <div class="ribbon">
+                <div class="seg" style="--seg-color:rgba(255,159,28,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(64,200,100,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(255,159,28,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(64,200,100,0.85)" data-color></div>
+              </div>
+            </div>
+            <div class="stack-label"><strong>橙绿交错</strong>用户痛点</div>
+          </div>
+          <div class="stack-cell">
+            <div class="tab-zoom">
+              <div class="ribbon">
+                <div class="seg" style="--seg-color:rgba(54,162,235,0.85)" data-color></div>
+                <div class="seg needs" style="--seg-color:rgba(255,59,48,0.95)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(255,159,28,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(115,180,200,0.85)" data-color></div>
+              </div>
+            </div>
+            <div class="stack-label"><strong>+ needs</strong>红脉动</div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">
+        <div>
+          <h4>不足</h4>
+          <ul>
+            <li>orange / green 亮度接近</li>
+            <li>thinking blue 跟 sweeping cyan 色相太近</li>
+            <li>fade 端区分度普遍掉</li>
+          </ul>
+        </div>
+        <div>
+          <h4>留作对照</h4>
+          <p>下面 3 个 variant 都跟这里直接比对,挑你最舒服的。</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- ===========================================
+         VARIANT 01 — Amber & Emerald (minimal change)
+         =========================================== -->
+    <article class="variant">
+      <header>
+        <div>
+          <div class="codename">VARIANT №01 · minimal</div>
+          <div class="name"><em>Amber &amp; Emerald</em></div>
+        </div>
+        <div class="numero">01</div>
+        <p class="one-line">只动 2 个色:orange → 更黄的 <code>#FFB020</code>;green → 更深更冷的
+          翡翠绿 <code>#10B981</code>。这俩现在亮度差大 + 色相隔了 100°,fade 端也分得开。
+          其余 4 色不动,最低改造成本。</p>
+      </header>
+      <div class="swatches">
+        <div class="swatch" style="background:#36A2EB"><span class="swatch-label">thinking</span><span class="swatch-hex">#36A2EB</span></div>
+        <div class="swatch" style="background:#FFB020"><span class="swatch-label">working</span><span class="swatch-hex">#FFB020 ⬆</span></div>
+        <div class="swatch" style="background:#AF50DC"><span class="swatch-label">juggling</span><span class="swatch-hex">#AF50DC</span></div>
+        <div class="swatch" style="background:#10B981"><span class="swatch-label">attention</span><span class="swatch-hex">#10B981 ⬆</span></div>
+        <div class="swatch" style="background:#73B4C8"><span class="swatch-label">sweeping</span><span class="swatch-hex">#73B4C8</span></div>
+        <div class="swatch" style="background:#FF3B30"><span class="swatch-label">error</span><span class="swatch-hex">#FF3B30</span></div>
+      </div>
+      <div class="stage">
+        <div class="label">All 6 + needs</div>
+        <div class="tab-stack-grid">
+          <div class="stack-cell">
+            <div class="tab-zoom">
+              <div class="ribbon">
+                <div class="seg" style="--seg-color:rgba(54,162,235,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(255,176,32,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(175,80,220,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(16,185,129,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(115,180,200,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(255,59,48,0.85)" data-color></div>
+              </div>
+            </div>
+            <div class="stack-label"><strong>6 states</strong>top→bottom</div>
+          </div>
+          <div class="stack-cell">
+            <div class="tab-zoom">
+              <div class="ribbon">
+                <div class="seg" style="--seg-color:rgba(255,176,32,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(16,185,129,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(255,176,32,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(16,185,129,0.85)" data-color></div>
+              </div>
+            </div>
+            <div class="stack-label"><strong>橙绿交错</strong>对比新解</div>
+          </div>
+          <div class="stack-cell">
+            <div class="tab-zoom">
+              <div class="ribbon">
+                <div class="seg" style="--seg-color:rgba(54,162,235,0.85)" data-color></div>
+                <div class="seg needs" style="--seg-color:rgba(255,59,48,0.95)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(255,176,32,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(115,180,200,0.85)" data-color></div>
+              </div>
+            </div>
+            <div class="stack-label"><strong>+ needs</strong>红脉动</div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">
+        <div>
+          <h4>改了什么</h4>
+          <ul>
+            <li><code>working</code> #FF9F1C → <code>#FFB020</code>(更黄/更亮,跟 error red 也拉开了)</li>
+            <li><code>attention</code> #40C864 → <code>#10B981</code>(deep emerald,亮度低饱和高)</li>
+          </ul>
+        </div>
+        <div>
+          <h4>取舍</h4>
+          <ul>
+            <li><strong>+</strong> 改动最小 — 4 个色不动,只调 2 个有冲突的</li>
+            <li><strong>+</strong> 亮度差最大,fade 端依然分得开</li>
+            <li><strong>−</strong> thinking 跟 sweeping 还是太靠近(留隐患)</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <!-- ===========================================
+         VARIANT 02 — Six Quadrants (full rebalance)
+         =========================================== -->
+    <article class="variant">
+      <header>
+        <div>
+          <div class="codename">VARIANT №02 · rebalance</div>
+          <div class="name"><em>Six Quadrants</em></div>
+        </div>
+        <div class="numero">02</div>
+        <p class="one-line">6 色铺满色相环,每色相隔 60°,亮度也错开。orange 变更暖的 <code>#FF7A1A</code>,
+          attention 走 turquoise <code>#14C4A1</code>,sweeping 退成纯灰蓝 <code>#7B8AA0</code>
+          (跟 thinking blue 区分开)。3 改动,体系最清爽。</p>
+      </header>
+      <div class="swatches">
+        <div class="swatch" style="background:#3B82F6"><span class="swatch-label">thinking</span><span class="swatch-hex">#3B82F6 ⬆</span></div>
+        <div class="swatch" style="background:#FF7A1A"><span class="swatch-label">working</span><span class="swatch-hex">#FF7A1A ⬆</span></div>
+        <div class="swatch" style="background:#C557E0"><span class="swatch-label">juggling</span><span class="swatch-hex">#C557E0 ⬆</span></div>
+        <div class="swatch" style="background:#14C4A1"><span class="swatch-label">attention</span><span class="swatch-hex">#14C4A1 ⬆</span></div>
+        <div class="swatch" style="background:#7B8AA0"><span class="swatch-label">sweeping</span><span class="swatch-hex">#7B8AA0 ⬆</span></div>
+        <div class="swatch" style="background:#EF4444"><span class="swatch-label">error</span><span class="swatch-hex">#EF4444 ⬆</span></div>
+      </div>
+      <div class="stage">
+        <div class="label">All 6 + needs</div>
+        <div class="tab-stack-grid">
+          <div class="stack-cell">
+            <div class="tab-zoom">
+              <div class="ribbon">
+                <div class="seg" style="--seg-color:rgba(59,130,246,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(255,122,26,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(197,87,224,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(20,196,161,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(123,138,160,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(239,68,68,0.85)" data-color></div>
+              </div>
+            </div>
+            <div class="stack-label"><strong>6 states</strong>top→bottom</div>
+          </div>
+          <div class="stack-cell">
+            <div class="tab-zoom">
+              <div class="ribbon">
+                <div class="seg" style="--seg-color:rgba(255,122,26,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(20,196,161,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(255,122,26,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(20,196,161,0.85)" data-color></div>
+              </div>
+            </div>
+            <div class="stack-label"><strong>橙绿交错</strong>turquoise 对比</div>
+          </div>
+          <div class="stack-cell">
+            <div class="tab-zoom">
+              <div class="ribbon">
+                <div class="seg" style="--seg-color:rgba(59,130,246,0.85)" data-color></div>
+                <div class="seg needs" style="--seg-color:rgba(239,68,68,0.95)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(255,122,26,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(123,138,160,0.85)" data-color></div>
+              </div>
+            </div>
+            <div class="stack-label"><strong>+ needs</strong>红脉动</div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">
+        <div>
+          <h4>改了什么</h4>
+          <ul>
+            <li><code>thinking</code> #36A2EB → <code>#3B82F6</code>(royal blue,更深)</li>
+            <li><code>working</code> → <code>#FF7A1A</code>(暖橙,跟绿色 hue 距离 100°+)</li>
+            <li><code>juggling</code> → <code>#C557E0</code>(更亮的洋红)</li>
+            <li><code>attention</code> → <code>#14C4A1</code>(turquoise,带 cyan 倾向)</li>
+            <li><code>sweeping</code> → <code>#7B8AA0</code>(去饱和的灰蓝,跟 thinking 完全分开)</li>
+            <li><code>error</code> → <code>#EF4444</code>(略深一点,纯红)</li>
+          </ul>
+        </div>
+        <div>
+          <h4>取舍</h4>
+          <ul>
+            <li><strong>+</strong> 整套体系一次性 rebalance,所有相邻对都拉开</li>
+            <li><strong>+</strong> sweeping 退成 muted gray-blue 反而更符合"compaction"语义</li>
+            <li><strong>−</strong> attention 变 turquoise 后跟 thinking blue 还隔得开但是同冷色族</li>
+            <li><strong>−</strong> 改动多,要更新所有 events 颜色映射 + a11y test</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <!-- ===========================================
+         VARIANT 03 — Editorial (character-driven)
+         =========================================== -->
+    <article class="variant">
+      <header>
+        <div>
+          <div class="codename">VARIANT №03 · editorial</div>
+          <div class="name"><em>Editorial</em></div>
+        </div>
+        <div class="numero">03</div>
+        <p class="one-line">把整套 palette 从"霓虹 + 警告色"挪到"印刷品 + 杂志油墨"美学。
+          饱和度普遍降,但每色加 character。读起来不像 system UI 警告,更像
+          一支 fine pen 在条纹纸上写。一次性大改。</p>
+      </header>
+      <div class="swatches">
+        <div class="swatch" style="background:#4F6FB8"><span class="swatch-label">thinking</span><span class="swatch-hex">#4F6FB8 ⬆</span></div>
+        <div class="swatch" style="background:#E8841F"><span class="swatch-label">working</span><span class="swatch-hex">#E8841F ⬆</span></div>
+        <div class="swatch" style="background:#8B5CF6"><span class="swatch-label">juggling</span><span class="swatch-hex">#8B5CF6 ⬆</span></div>
+        <div class="swatch" style="background:#0D9488"><span class="swatch-label">attention</span><span class="swatch-hex">#0D9488 ⬆</span></div>
+        <div class="swatch" style="background:#A39584"><span class="swatch-label">sweeping</span><span class="swatch-hex">#A39584 ⬆</span></div>
+        <div class="swatch" style="background:#C53030"><span class="swatch-label">error</span><span class="swatch-hex">#C53030 ⬆</span></div>
+      </div>
+      <div class="stage">
+        <div class="label">All 6 + needs</div>
+        <div class="tab-stack-grid">
+          <div class="stack-cell">
+            <div class="tab-zoom">
+              <div class="ribbon">
+                <div class="seg" style="--seg-color:rgba(79,111,184,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(232,132,31,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(139,92,246,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(13,148,136,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(163,149,132,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(197,48,48,0.85)" data-color></div>
+              </div>
+            </div>
+            <div class="stack-label"><strong>6 states</strong>top→bottom</div>
+          </div>
+          <div class="stack-cell">
+            <div class="tab-zoom">
+              <div class="ribbon">
+                <div class="seg" style="--seg-color:rgba(232,132,31,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(13,148,136,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(232,132,31,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(13,148,136,0.85)" data-color></div>
+              </div>
+            </div>
+            <div class="stack-label"><strong>橙绿交错</strong>印刷感对比</div>
+          </div>
+          <div class="stack-cell">
+            <div class="tab-zoom">
+              <div class="ribbon">
+                <div class="seg" style="--seg-color:rgba(79,111,184,0.85)" data-color></div>
+                <div class="seg needs" style="--seg-color:rgba(197,48,48,0.95)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(232,132,31,0.85)" data-color></div>
+                <div class="seg" style="--seg-color:rgba(163,149,132,0.85)" data-color></div>
+              </div>
+            </div>
+            <div class="stack-label"><strong>+ needs</strong>红脉动</div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">
+        <div>
+          <h4>改了什么(全部)</h4>
+          <ul>
+            <li><code>thinking</code> → <code>#4F6FB8</code>(粉笔蓝,深色)</li>
+            <li><code>working</code> → <code>#E8841F</code>(烧橙/印刷橙)</li>
+            <li><code>juggling</code> → <code>#8B5CF6</code>(薰衣草紫)</li>
+            <li><code>attention</code> → <code>#0D9488</code>(深松石 teal)</li>
+            <li><code>sweeping</code> → <code>#A39584</code>(纸张米色 — 不再是冷色)</li>
+            <li><code>error</code> → <code>#C53030</code>(印章红,不再霓虹)</li>
+          </ul>
+        </div>
+        <div>
+          <h4>取舍</h4>
+          <ul>
+            <li><strong>+</strong> 整体调性从"系统警告"挪到"杂志/印刷",更有品味</li>
+            <li><strong>+</strong> 饱和度普遍降,长时间观看不刺眼</li>
+            <li><strong>−</strong> error 失去"霓虹红"的警觉性,可能弱化紧急感</li>
+            <li><strong>−</strong> sweeping 米色在深色背景上偏淡(可能弱到看不见)</li>
+            <li><strong>−</strong> 跟 macOS 系统色脱节最大</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+  </main>
+
+  <!-- COMPARISON FOOTER -->
+  <section style="margin-top:80px;padding-top:40px;border-top:1px solid var(--rule)">
+    <div class="kicker">回到取舍 · summary</div>
+    <h2 style="font-family:var(--serif);font-style:italic;font-weight:400;font-size:36px;line-height:1.1;margin:0 0 32px">挑一个 —— 或者拼接。</h2>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:28px;font-size:12.5px;line-height:1.6">
+      <div>
+        <div class="kicker">00 · Current</div>
+        <p style="color:var(--ink-dim);margin:0">今天的色,留作对照。</p>
+      </div>
+      <div>
+        <div class="kicker">01 · Amber &amp; Emerald</div>
+        <p style="color:var(--ink-dim);margin:0">最小改动 — 只动 2 个色拉亮度。<strong>推荐当作 P0 改</strong>。</p>
+      </div>
+      <div>
+        <div class="kicker">02 · Six Quadrants</div>
+        <p style="color:var(--ink-dim);margin:0">系统性重 balance — 把所有相邻冲突一次清掉。改动量适中。</p>
+      </div>
+      <div>
+        <div class="kicker">03 · Editorial</div>
+        <p style="color:var(--ink-dim);margin:0">大改 — 整体美学换风格。如果你觉得 system 警告色太"科技公司"。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footnote">
+    <div>CCBar · Palette Redesign Brief №02 · 内部 mockup,非生产稿</div>
+    <div class="right">render · <a href="#" style="color:var(--ink-dim);text-decoration:none;border-bottom:1px dotted var(--ink-fainter)">2026-05-28-floating-tab-palette-mockups.html</a></div>
+  </footer>
+
+</div>
+</body>
+</html>

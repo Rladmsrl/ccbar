@@ -1,0 +1,1201 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<title>CCBar · Floating Tab Redesign Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #f5f3ee;
+    --ink-dim: #9b9690;
+    --ink-fainter: #56524d;
+    --rule: #2a2724;
+    --rule-soft: #1c1a18;
+    --paper: #0d0b09;
+    --paper-warm: #14110e;
+    --desktop: #1a1714;
+    --thinking: #36a2eb;
+    --working: #ff9f1c;
+    --juggling: #af50dc;
+    --attention: #40c864;
+    --sweeping: #73b4c8;
+    --danger: #ff3b30;
+    --idle: #4a4642;
+    --serif: 'Instrument Serif', 'Times New Roman', serif;
+    --mono: 'Geist Mono', ui-monospace, 'SF Mono', monospace;
+    --body: 'Geist', -apple-system, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { scrollbar-color: #2a2724 #0d0b09; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 1.55;
+    letter-spacing: 0.005em;
+    background-image:
+      radial-gradient(ellipse at 12% -5%, rgba(255, 159, 28, 0.04), transparent 45%),
+      radial-gradient(ellipse at 88% 105%, rgba(54, 162, 235, 0.05), transparent 50%);
+    background-attachment: fixed;
+  }
+
+  ::selection { background: rgba(255, 159, 28, 0.3); }
+
+  .frame {
+    max-width: 1480px;
+    margin: 0 auto;
+    padding: 88px 56px 120px;
+  }
+
+  /* HEADER ---------------------------------------------------- */
+  .masthead {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 40px;
+    align-items: end;
+    margin-bottom: 56px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .masthead .marque {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-dim);
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .marque .pip { width: 6px; height: 6px; background: var(--working); border-radius: 50%; }
+  .masthead h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-style: italic;
+    font-size: clamp(48px, 6vw, 84px);
+    line-height: 1;
+    letter-spacing: -0.015em;
+    margin: 18px 0 0;
+    color: var(--ink);
+  }
+  .masthead h1 em {
+    font-style: normal;
+    font-family: var(--body);
+    font-weight: 300;
+    letter-spacing: -0.005em;
+  }
+  .masthead .meta {
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-fainter);
+    letter-spacing: 0.05em;
+  }
+  .masthead .meta strong {
+    color: var(--ink-dim);
+    font-weight: 500;
+  }
+
+  /* BRIEF ---------------------------------------------------- */
+  .brief {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 56px;
+    margin-bottom: 80px;
+    padding-bottom: 56px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .brief h2 {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 28px;
+    line-height: 1.15;
+    margin: 0 0 14px;
+    color: var(--ink);
+  }
+  .brief p {
+    margin: 0 0 12px;
+    color: var(--ink-dim);
+  }
+  .brief .kicker {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-fainter);
+    margin-bottom: 10px;
+  }
+  .palette {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .palette-row {
+    display: grid;
+    grid-template-columns: 18px 1fr auto;
+    gap: 12px;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-dim);
+  }
+  .palette-row .chip {
+    width: 18px; height: 18px;
+    border-radius: 3px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .palette-row .hex {
+    color: var(--ink-fainter);
+    font-size: 10px;
+  }
+
+  /* VARIANT --------------------------------------------------- */
+  .variants {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 56px 48px;
+  }
+
+  .variant {
+    display: grid;
+    grid-template-rows: auto auto auto auto auto;
+    border: 1px solid var(--rule);
+    background: linear-gradient(180deg, rgba(255,255,255,0.012), transparent 30%), var(--paper-warm);
+    overflow: hidden;
+  }
+
+  .variant header {
+    padding: 28px 32px 22px;
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: end;
+  }
+  .variant .numero {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 56px;
+    line-height: 0.85;
+    color: var(--ink);
+    letter-spacing: -0.025em;
+  }
+  .variant .name {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 36px;
+    line-height: 1;
+    color: var(--ink);
+    margin-top: 6px;
+    letter-spacing: -0.015em;
+  }
+  .variant .codename {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-fainter);
+  }
+  .variant .one-line {
+    font-family: var(--body);
+    color: var(--ink-dim);
+    font-size: 13px;
+    line-height: 1.5;
+    margin-top: 12px;
+    grid-column: 1 / -1;
+  }
+
+  /* desktop strip --------------------------------------- */
+  .desktop {
+    height: 220px;
+    background:
+      radial-gradient(ellipse at 28% 40%, rgba(255, 159, 28, 0.08), transparent 45%),
+      radial-gradient(ellipse at 75% 80%, rgba(54, 162, 235, 0.10), transparent 50%),
+      linear-gradient(160deg, #1a1714 0%, #0e0c0a 100%);
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--rule);
+  }
+  .desktop::before {
+    /* faux desktop noise / texture */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+    background-size: 24px 24px;
+    opacity: 0.6;
+  }
+  .desktop::after {
+    /* fake menu bar */
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 22px;
+    background: rgba(20, 17, 14, 0.85);
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .desktop .menu-bar-icons {
+    position: absolute;
+    top: 5px; right: 10px;
+    display: flex; gap: 8px;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: rgba(255,255,255,0.4);
+    z-index: 1;
+  }
+  .desktop .menu-bar-icons span { letter-spacing: 0.1em; }
+  .desktop .dock-zone {
+    /* show the tab anchored to right edge in real proportions */
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  /* zoom stage --------------------------------------- */
+  .zoom-stage {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 22px;
+    padding: 32px 28px 36px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 80%),
+      #0a0907;
+    border-bottom: 1px solid var(--rule);
+  }
+  .zoom-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .zoom-cell .stage {
+    height: 230px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(ellipse at 50% 65%, rgba(54, 162, 235, 0.06), transparent 65%),
+      #0d0b09;
+    border: 1px solid rgba(255,255,255,0.03);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+  .zoom-cell .stage::after {
+    /* subtle radial vignette */
+    content: "";
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.5) 100%);
+    pointer-events: none;
+  }
+  .zoom-cell .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-fainter);
+    text-align: center;
+  }
+  .zoom-cell .label strong {
+    color: var(--ink-dim);
+    font-weight: 500;
+    display: block;
+    font-size: 10.5px;
+  }
+
+  /* notes ----------------------------------------- */
+  .notes {
+    padding: 26px 32px 30px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    background: rgba(255,255,255,0.005);
+  }
+  .notes h4 {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-fainter);
+    margin: 0 0 10px;
+    font-weight: 500;
+  }
+  .notes p {
+    margin: 0;
+    color: var(--ink-dim);
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+  .notes ul {
+    margin: 0;
+    padding-left: 16px;
+    color: var(--ink-dim);
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+  .notes li { margin-bottom: 4px; }
+  .notes li::marker { color: var(--ink-fainter); }
+
+  /* ==================================================
+     THE TAB ITSELF — multiple variants share base geometry
+     Native size: 36×108 pt vertical. We render @4x for clarity
+     on retina screens.
+     ================================================== */
+
+  .tab-native {
+    /* used inside the desktop mockup — actual visual size */
+    width: 36px;
+    height: 108px;
+    position: relative;
+  }
+  .tab-zoom {
+    /* used inside zoom-stage */
+    width: 80px;
+    height: 200px;
+    position: relative;
+  }
+
+  /* ============================================================
+     V1 — RIBBON
+     Pure segmented strip, overflow segment gets a
+     "stacked layers" treatment with internal hairlines.
+     Drag handle reads as a top serif.
+     ============================================================ */
+
+  .ribbon {
+    background: rgba(20, 17, 14, 0.7);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border-radius: 6px 0 0 6px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow:
+      inset 1px 0 0 rgba(255,255,255,0.04),
+      -2px 0 16px rgba(0,0,0,0.4);
+  }
+  .ribbon .ribbon-handle {
+    height: 6%;
+    background: linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.06),
+      rgba(255,255,255,0.02));
+    border-bottom: 1px solid rgba(0,0,0,0.4);
+    position: relative;
+  }
+  .ribbon .ribbon-handle::after {
+    content: "";
+    position: absolute;
+    left: 25%; right: 25%;
+    top: 50%; transform: translateY(-50%);
+    height: 1px;
+    background: rgba(255,255,255,0.18);
+  }
+  .ribbon-seg {
+    flex: 1;
+    border-bottom: 1px solid rgba(0,0,0,0.45);
+    position: relative;
+    overflow: hidden;
+  }
+  .ribbon-seg:last-child { border-bottom: 0; }
+  .ribbon-seg.s-working { background: linear-gradient(90deg, rgba(255,159,28,0.85), rgba(255,159,28,0.15)); }
+  .ribbon-seg.s-thinking { background: linear-gradient(90deg, rgba(54,162,235,0.85), rgba(54,162,235,0.15)); }
+  .ribbon-seg.s-juggling { background: linear-gradient(90deg, rgba(175,80,220,0.85), rgba(175,80,220,0.15)); }
+  .ribbon-seg.s-attention { background: linear-gradient(90deg, rgba(64,200,100,0.85), rgba(64,200,100,0.15)); }
+  .ribbon-seg.s-sweeping { background: linear-gradient(90deg, rgba(115,180,200,0.85), rgba(115,180,200,0.15)); }
+  .ribbon-seg.s-needs {
+    background: linear-gradient(90deg, rgba(255,59,48,0.95), rgba(255,59,48,0.25));
+    animation: needsPulse 0.9s ease-in-out infinite;
+  }
+  .ribbon-seg.s-idle { background: rgba(74,70,66,0.18); }
+
+  /* overflow segment — stacked layers reading */
+  .ribbon-seg.s-overflow {
+    background:
+      linear-gradient(90deg, rgba(255,159,28,0.85), rgba(255,159,28,0.15)),
+      repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 3px,
+        rgba(0,0,0,0.18) 3px,
+        rgba(0,0,0,0.18) 4px
+      );
+    background-blend-mode: multiply, normal;
+    position: relative;
+  }
+  .ribbon-seg.s-overflow .overflow-count {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-weight: 500;
+    color: rgba(255,255,255,0.95);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+    letter-spacing: 0.02em;
+  }
+  .tab-native .overflow-count { font-size: 8.5px; }
+  .tab-zoom .overflow-count { font-size: 18px; }
+
+  /* ============================================================
+     V2 — PILL
+     Single dominant-state pill. Big N typography.
+     A thin "spine" inside hints at fleet activity.
+     ============================================================ */
+
+  .pill {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255,159,28,0.65), rgba(255,159,28,0.35) 60%, rgba(255,159,28,0.18) 100%);
+    border-radius: 18px 0 0 18px;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+      inset 1px 0 0 rgba(255,255,255,0.12),
+      inset 0 0 24px rgba(0,0,0,0.25),
+      -2px 0 16px rgba(255,159,28,0.18);
+  }
+  .pill.calm { /* idle/no sessions */
+    background: rgba(20,17,14,0.7);
+    backdrop-filter: blur(20px) saturate(140%);
+    box-shadow:
+      inset 1px 0 0 rgba(255,255,255,0.04),
+      -2px 0 16px rgba(0,0,0,0.4);
+  }
+  .pill.thinking { background: radial-gradient(ellipse at 50% 0%, rgba(54,162,235,0.65), rgba(54,162,235,0.35) 60%, rgba(54,162,235,0.18) 100%); box-shadow: inset 1px 0 0 rgba(255,255,255,0.12), inset 0 0 24px rgba(0,0,0,0.25), -2px 0 16px rgba(54,162,235,0.18); }
+  .pill.needs {
+    background: radial-gradient(ellipse at 50% 0%, rgba(255,59,48,0.9), rgba(255,59,48,0.5) 60%, rgba(255,59,48,0.2) 100%);
+    box-shadow: inset 1px 0 0 rgba(255,255,255,0.18), inset 0 0 28px rgba(0,0,0,0.3), -2px 0 22px rgba(255,59,48,0.32);
+    animation: needsPulse 1.05s ease-in-out infinite;
+  }
+  .pill .pill-spine {
+    position: absolute;
+    top: 14%; bottom: 14%;
+    left: 18%;
+    width: 2px;
+    background: linear-gradient(
+      180deg,
+      rgba(255,255,255,0.4) 0%,
+      rgba(255,255,255,0.4) 14.28%,
+      rgba(255,255,255,0.12) 14.28%,
+      rgba(255,255,255,0.12) 17.85%,
+      rgba(255,255,255,0.4) 17.85%,
+      rgba(255,255,255,0.4) 32.13%,
+      rgba(255,255,255,0.12) 32.13%,
+      rgba(255,255,255,0.12) 35.7%,
+      rgba(255,255,255,0.4) 35.7%,
+      rgba(255,255,255,0.4) 49.98%,
+      rgba(255,255,255,0.12) 49.98%,
+      rgba(255,255,255,0.12) 53.55%,
+      rgba(255,255,255,0.4) 53.55%,
+      rgba(255,255,255,0.4) 67.83%,
+      rgba(255,255,255,0.12) 67.83%,
+      rgba(255,255,255,0.12) 71.4%,
+      rgba(255,255,255,0.4) 71.4%);
+    border-radius: 1px;
+    opacity: 0.85;
+  }
+  .pill .pill-num {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--serif);
+    font-weight: 400;
+    color: rgba(255,255,255,0.98);
+    text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+    letter-spacing: -0.03em;
+    padding-left: 18%;
+  }
+  .tab-native .pill-num { font-size: 24px; }
+  .tab-zoom .pill-num { font-size: 56px; }
+  .pill.calm .pill-num { color: rgba(245,243,238,0.85); text-shadow: none; }
+  .pill.calm .pill-spine { background: rgba(255,255,255,0.18); opacity: 0.5; }
+
+  /* ============================================================
+     V3 — TAG-OUT
+     100% segmented bar + an externally-tagged N chip.
+     The chip sticks out into the desktop space.
+     ============================================================ */
+
+  .tagout {
+    position: relative;
+    /* override .tab-* sizing — needs extra room for the chip */
+    overflow: visible !important;
+  }
+  .tagout-bar {
+    background: rgba(20, 17, 14, 0.7);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border-radius: 6px 0 0 6px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    box-shadow:
+      inset 1px 0 0 rgba(255,255,255,0.04),
+      -2px 0 16px rgba(0,0,0,0.4);
+  }
+  .tagout-bar .tagout-seg {
+    flex: 1;
+    border-bottom: 1px solid rgba(0,0,0,0.45);
+  }
+  .tagout-bar .tagout-seg:last-child { border-bottom: 0; }
+  .tagout-bar .tagout-seg.s-working { background: linear-gradient(90deg, rgba(255,159,28,0.85), rgba(255,159,28,0.15)); }
+  .tagout-bar .tagout-seg.s-thinking { background: linear-gradient(90deg, rgba(54,162,235,0.85), rgba(54,162,235,0.15)); }
+  .tagout-bar .tagout-seg.s-juggling { background: linear-gradient(90deg, rgba(175,80,220,0.85), rgba(175,80,220,0.15)); }
+  .tagout-bar .tagout-seg.s-attention { background: linear-gradient(90deg, rgba(64,200,100,0.85), rgba(64,200,100,0.15)); }
+  .tagout-bar .tagout-seg.s-sweeping { background: linear-gradient(90deg, rgba(115,180,200,0.85), rgba(115,180,200,0.15)); }
+  .tagout-bar .tagout-seg.s-needs {
+    background: linear-gradient(90deg, rgba(255,59,48,0.95), rgba(255,59,48,0.25));
+    animation: needsPulse 0.9s ease-in-out infinite;
+  }
+  .tagout-bar .tagout-seg.s-idle { background: rgba(74,70,66,0.18); }
+
+  .tagout-chip {
+    position: absolute;
+    /* sticks out to the LEFT (into desktop) since the bar is on right edge */
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 9px 5px 11px;
+    background: rgba(20,17,14,0.92);
+    backdrop-filter: blur(20px) saturate(140%);
+    border-radius: 12px 0 0 12px;
+    box-shadow:
+      inset 1px 0 0 rgba(255,255,255,0.05),
+      -4px 2px 12px rgba(0,0,0,0.5);
+    font-family: var(--mono);
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+  .tab-native .tagout-chip { font-size: 11px; padding: 4px 6px 4px 8px; }
+  .tab-zoom .tagout-chip { font-size: 19px; padding: 8px 12px 8px 16px; }
+  .tagout-chip .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--working);
+    box-shadow: 0 0 6px rgba(255,159,28,0.6);
+  }
+  .tab-zoom .tagout-chip .dot { width: 10px; height: 10px; }
+  .tagout-chip.is-needs .dot {
+    background: var(--danger);
+    box-shadow: 0 0 8px rgba(255,59,48,0.7);
+    animation: dotPulse 0.9s ease-in-out infinite;
+  }
+  .tagout-chip.is-calm .dot {
+    background: var(--idle);
+    box-shadow: none;
+  }
+
+  /* ============================================================
+     V4 — SLATS
+     Each session is a thin horizontal line. Density is the count.
+     Bar background stays minimal; lines sit on top.
+     ============================================================ */
+
+  .slats {
+    background: rgba(20, 17, 14, 0.78);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border-radius: 4px 0 0 4px;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+      inset 1px 0 0 rgba(255,255,255,0.04),
+      -2px 0 16px rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 12% 0;
+    gap: 6px;
+  }
+  .tab-native .slats { gap: 2px; padding: 8% 0; }
+  .slats .slat {
+    flex: 0 0 auto;
+    height: 4px;
+    margin: 0 18%;
+    border-radius: 2px;
+  }
+  .tab-native .slats .slat { height: 1.5px; margin: 0 22%; border-radius: 1px; }
+  .slats .slat.s-working { background: var(--working); box-shadow: 0 0 4px rgba(255,159,28,0.5); }
+  .slats .slat.s-thinking { background: var(--thinking); box-shadow: 0 0 4px rgba(54,162,235,0.5); }
+  .slats .slat.s-juggling { background: var(--juggling); box-shadow: 0 0 4px rgba(175,80,220,0.5); }
+  .slats .slat.s-attention { background: var(--attention); box-shadow: 0 0 4px rgba(64,200,100,0.5); }
+  .slats .slat.s-sweeping { background: var(--sweeping); }
+  .slats .slat.s-needs {
+    background: var(--danger);
+    box-shadow: 0 0 8px rgba(255,59,48,0.8);
+    height: 6px;
+    animation: needsPulse 0.9s ease-in-out infinite;
+  }
+  .tab-native .slats .slat.s-needs { height: 2.5px; }
+  .slats .slat.s-idle { background: var(--idle); opacity: 0.6; }
+  .slats .slat.cluster-extra {
+    /* the "overflow cluster" lines pack denser & dimmer */
+    opacity: 0.55;
+  }
+  .slats .cluster-gap {
+    height: 0; margin: 2px 0 0;
+    border-top: 1px dashed rgba(255,255,255,0.06);
+  }
+  .tab-native .slats .cluster-gap { margin: 1px 0 0; }
+
+  /* utility — needs pulse keyframes */
+  @keyframes needsPulse {
+    0%, 100% { filter: brightness(1); opacity: 1; }
+    50% { filter: brightness(1.25); opacity: 0.92; }
+  }
+  @keyframes dotPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+  }
+
+  /* footer ------------------------------------------------ */
+  .footnote {
+    margin-top: 88px;
+    padding-top: 28px;
+    border-top: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    color: var(--ink-fainter);
+  }
+  .footnote a { color: var(--ink-dim); text-decoration: none; border-bottom: 1px dotted var(--ink-fainter); }
+  .footnote .right { text-align: right; }
+
+  /* small screens — keep useable */
+  @media (max-width: 1100px) {
+    .frame { padding: 56px 24px 88px; }
+    .variants { grid-template-columns: 1fr; }
+    .brief { grid-template-columns: 1fr; gap: 28px; }
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <!-- MASTHEAD ============================================== -->
+  <header class="masthead">
+    <div>
+      <div class="marque"><span class="pip"></span> CCBar · Floating Tab · Redesign Brief №01</div>
+      <h1><em>四种</em> 重新定义<br>这条 36×108 的边缘条</h1>
+    </div>
+    <div class="meta">
+      Today &middot; <strong>2026-05-28</strong><br>
+      Mockup &middot; <strong>4 variants</strong><br>
+      Render &middot; <strong>4× retina @ desktop</strong>
+    </div>
+  </header>
+
+  <!-- BRIEF ============================================== -->
+  <section class="brief">
+    <div>
+      <div class="kicker">现状的张力</div>
+      <h2>"●N 跟段染色在 36 点宽里抢着说话"</h2>
+      <p>当前实现把折叠条切成 80/20:上 80% 走段染色,下 20% 给 <code style="font-family:var(--mono);color:var(--ink)">●N</code> badge。问题:</p>
+      <ul style="margin:0;padding-left:18px;color:var(--ink-dim);font-size:13px;line-height:1.6">
+        <li>20% 给一个圆点 + 数字太挤,排版受困</li>
+        <li>overflow 段(聚合多个 session)跟独立段视觉完全一样,看不出"这一段藏了 N 个"</li>
+        <li>圆点的位置反复刷新,且跟最上面的段染色色相相同时会糊在一起</li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="kicker">需要表达的信息</div>
+      <h2 style="font-size:22px">五件事,一条 36×108 的窄条</h2>
+      <ol style="margin:0;padding-left:18px;color:var(--ink-dim);font-size:12.5px;line-height:1.65">
+        <li>当前活跃 session 总数 N</li>
+        <li>每个 session 的状态颜色(thinking/working/needs-input/...)</li>
+        <li>N 超过 cap 时 — overflow 聚合的提示</li>
+        <li>是否有 needs-input(紧急)</li>
+        <li>拖拽可用(drag affordance)</li>
+      </ol>
+    </div>
+
+    <div>
+      <div class="kicker">状态色板</div>
+      <div class="palette">
+        <div class="palette-row"><span class="chip" style="background:var(--thinking)"></span><span>thinking</span><span class="hex">#36A2EB</span></div>
+        <div class="palette-row"><span class="chip" style="background:var(--working)"></span><span>working</span><span class="hex">#FF9F1C</span></div>
+        <div class="palette-row"><span class="chip" style="background:var(--juggling)"></span><span>juggling</span><span class="hex">#AF50DC</span></div>
+        <div class="palette-row"><span class="chip" style="background:var(--attention)"></span><span>attention</span><span class="hex">#40C864</span></div>
+        <div class="palette-row"><span class="chip" style="background:var(--sweeping)"></span><span>sweeping</span><span class="hex">#73B4C8</span></div>
+        <div class="palette-row"><span class="chip" style="background:var(--danger)"></span><span>needs / error</span><span class="hex">#FF3B30</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VARIANTS ============================================== -->
+  <main class="variants">
+
+    <!-- ====================================================
+         VARIANT 01 — RIBBON (refined-current)
+         ==================================================== -->
+    <article class="variant">
+      <header>
+        <div>
+          <div class="codename">VARIANT №01</div>
+          <div class="name"><em>Ribbon</em></div>
+          <p class="one-line">把现在的方案打磨到位 — 100% 段染色,overflow 段加叠层条纹,数字进段内,顶部一条短横线当 drag 把手。彻底丢掉 <code style="font-family:var(--mono);color:var(--ink)">●N</code>。</p>
+        </div>
+        <div class="numero">01</div>
+      </header>
+
+      <!-- desktop preview -->
+      <div class="desktop">
+        <div class="menu-bar-icons">
+          <span>WIFI</span><span>BAT 91%</span><span>10:32</span>
+        </div>
+        <div class="dock-zone">
+          <div class="tab-native">
+            <div class="ribbon" style="width:100%;height:100%">
+              <div class="ribbon-handle"></div>
+              <div class="ribbon-seg s-thinking"></div>
+              <div class="ribbon-seg s-working"></div>
+              <div class="ribbon-seg s-juggling"></div>
+              <div class="ribbon-seg s-attention"></div>
+              <div class="ribbon-seg s-overflow"><span class="overflow-count">+3</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- zoom -->
+      <div class="zoom-stage">
+        <div class="zoom-cell">
+          <div class="stage">
+            <div class="tab-zoom">
+              <div class="ribbon" style="width:100%;height:100%">
+                <div class="ribbon-handle"></div>
+                <div class="ribbon-seg s-idle"></div>
+                <div class="ribbon-seg s-idle"></div>
+              </div>
+            </div>
+          </div>
+          <div class="label"><strong>2 idle</strong>无活动</div>
+        </div>
+        <div class="zoom-cell">
+          <div class="stage">
+            <div class="tab-zoom">
+              <div class="ribbon" style="width:100%;height:100%">
+                <div class="ribbon-handle"></div>
+                <div class="ribbon-seg s-thinking"></div>
+                <div class="ribbon-seg s-working"></div>
+                <div class="ribbon-seg s-attention"></div>
+                <div class="ribbon-seg s-working"></div>
+              </div>
+            </div>
+          </div>
+          <div class="label"><strong>4 active</strong>cap = 5</div>
+        </div>
+        <div class="zoom-cell">
+          <div class="stage">
+            <div class="tab-zoom">
+              <div class="ribbon" style="width:100%;height:100%">
+                <div class="ribbon-handle"></div>
+                <div class="ribbon-seg s-thinking"></div>
+                <div class="ribbon-seg s-working"></div>
+                <div class="ribbon-seg s-juggling"></div>
+                <div class="ribbon-seg s-attention"></div>
+                <div class="ribbon-seg s-overflow"><span class="overflow-count">+3</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="label"><strong>7 active</strong>cap = 5,溢出 3</div>
+        </div>
+        <div class="zoom-cell">
+          <div class="stage">
+            <div class="tab-zoom">
+              <div class="ribbon" style="width:100%;height:100%">
+                <div class="ribbon-handle"></div>
+                <div class="ribbon-seg s-thinking"></div>
+                <div class="ribbon-seg s-needs"></div>
+                <div class="ribbon-seg s-working"></div>
+                <div class="ribbon-seg s-attention"></div>
+              </div>
+            </div>
+          </div>
+          <div class="label"><strong>needs-input</strong>第 2 段抓眼</div>
+        </div>
+      </div>
+
+      <!-- notes -->
+      <div class="notes">
+        <div>
+          <h4>设计语言</h4>
+          <p>纯色带,每段都是一个 session。Overflow 段叠了水平条纹(每行 1px 暗线),读起来像"多张纸叠在一起",中间叠 <code style="font-family:var(--mono);color:var(--ink-dim)">+N</code> 字样。顶上一条 6% 高度的短横线 = drag handle,顺便消化 macOS 的拖拽 feedback。</p>
+        </div>
+        <div>
+          <h4>取舍</h4>
+          <ul>
+            <li><strong>+</strong> 改动最小,沿用既有 SwiftUI 实现</li>
+            <li><strong>+</strong> 信息密度最高(每段一一对应 session)</li>
+            <li><strong>−</strong> 36pt 宽里的 <code style="font-family:var(--mono);color:var(--ink-dim)">+3</code> 字号必须很小(~8.5pt),无障碍折损</li>
+            <li><strong>−</strong> N 总数从此不直显,要数段</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <!-- ====================================================
+         VARIANT 02 — PILL
+         ==================================================== -->
+    <article class="variant">
+      <header>
+        <div>
+          <div class="codename">VARIANT №02</div>
+          <div class="name"><em>Pill</em></div>
+          <p class="one-line">不再表达"每个 session 是什么状态" — 折叠条只回答一个问题:<em>"现在 N 个 session,主要在 ___ 状态"</em>。大字 N + dominant-state 整条染色 + 内侧细脊条做 fleet hint。</p>
+        </div>
+        <div class="numero">02</div>
+      </header>
+
+      <div class="desktop">
+        <div class="menu-bar-icons">
+          <span>WIFI</span><span>BAT 91%</span><span>10:32</span>
+        </div>
+        <div class="dock-zone">
+          <div class="tab-native">
+            <div class="pill" style="width:100%;height:100%">
+              <div class="pill-spine"></div>
+              <div class="pill-num">7</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="zoom-stage">
+        <div class="zoom-cell">
+          <div class="stage">
+            <div class="tab-zoom">
+              <div class="pill calm" style="width:100%;height:100%">
+                <div class="pill-spine"></div>
+                <div class="pill-num">0</div>
+              </div>
+            </div>
+          </div>
+          <div class="label"><strong>0 sessions</strong>静音态</div>
+        </div>
+        <div class="zoom-cell">
+          <div class="stage">
+            <div class="tab-zoom">
+              <div class="pill thinking" style="width:100%;height:100%">
+                <div class="pill-spine"></div>
+                <div class="pill-num">4</div>
+              </div>
+            </div>
+          </div>
+          <div class="label"><strong>4 thinking</strong>主色 = thinking</div>
+        </div>
+        <div class="zoom-cell">
+          <div class="stage">
+            <div class="tab-zoom">
+              <div class="pill" style="width:100%;height:100%">
+                <div class="pill-spine"></div>
+                <div class="pill-num">7</div>
+              </div>
+            </div>
+          </div>
+          <div class="label"><strong>7 working</strong>主色 = working</div>
+        </div>
+        <div class="zoom-cell">
+          <div class="stage">
+            <div class="tab-zoom">
+              <div class="pill needs" style="width:100%;height:100%">
+                <div class="pill-spine"></div>
+                <div class="pill-num">5</div>
+              </div>
+            </div>
+          </div>
+          <div class="label"><strong>needs-input</strong>整条变红+脉动</div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <div>
+          <h4>设计语言</h4>
+          <p>整条 pill 用 dominant state 渲染。N 用 Instrument Serif italic 大字 — 优雅、有性格,跟开发者 dev tool 调性匹配。左侧一根 2pt 宽的"脊条"用明暗段拟态 N 个 session(像音乐均衡器,但极简)。</p>
+        </div>
+        <div>
+          <h4>取舍</h4>
+          <ul>
+            <li><strong>+</strong> 远观清晰:你瞄一眼就知道 N + 主要状态</li>
+            <li><strong>+</strong> needs-input 整条变红 + 脉动 — 最强烈的 alert</li>
+            <li><strong>−</strong> 丢失"每个 session 单独颜色"信息(脊条只是 hint,不是精确映射)</li>
+            <li><strong>−</strong> 需要新的 SwiftUI 组件,工作量大</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <!-- ====================================================
+         VARIANT 03 — TAG-OUT
+         ==================================================== -->
+    <article class="variant">
+      <header>
+        <div>
+          <div class="codename">VARIANT №03</div>
+          <div class="name"><em>Tag-out</em></div>
+          <p class="one-line">把 <code style="font-family:var(--mono);color:var(--ink)">●N</code> 从条里赶出去 — 让 N chip 像一个小标签贴在条的中段、向桌面方向探出来。条本身 100% 留给段染色。两个图层各得其所。</p>
+        </div>
+        <div class="numero">03</div>
+      </header>
+
+      <div class="desktop">
+        <div class="menu-bar-icons">
+          <span>WIFI</span><span>BAT 91%</span><span>10:32</span>
+        </div>
+        <div class="dock-zone">
+          <div class="tab-native tagout">
+            <div class="tagout-bar">
+              <div class="tagout-seg s-thinking"></div>
+              <div class="tagout-seg s-working"></div>
+              <div class="tagout-seg s-juggling"></div>
+              <div class="tagout-seg s-attention"></div>
+              <div class="tagout-seg s-working"></div>
+            </div>
+            <div class="tagout-chip"><span class="dot"></span>5</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="zoom-stage">
+        <div class="zoom-cell">
+          <div class="stage">
+            <div class="tab-zoom tagout">
+              <div class="tagout-bar">
+                <div class="tagout-seg s-idle"></div>
+                <div class="tagout-seg s-idle"></div>
+              </div>
+              <div class="tagout-chip is-calm"><span class="dot"></span>2</div>
+            </div>
+          </div>
+          <div class="label"><strong>2 idle</strong>低饱和 chip</div>
+        </div>
+        <div class="zoom-cell">
+          <div class="stage">
+            <div class="tab-zoom tagout">
+              <div class="tagout-bar">
+                <div class="tagout-seg s-thinking"></div>
+                <div class="tagout-seg s-working"></div>
+                <div class="tagout-seg s-attention"></div>
+                <div class="tagout-seg s-working"></div>
+              </div>
+              <div class="tagout-chip"><span class="dot"></span>4</div>
+            </div>
+          </div>
+          <div class="label"><strong>4 active</strong>条 + chip 并存</div>
+        </div>
+        <div class="zoom-cell">
+          <div class="stage">
+            <div class="tab-zoom tagout">
+              <div class="tagout-bar">
+                <div class="tagout-seg s-thinking"></div>
+                <div class="tagout-seg s-working"></div>
+                <div class="tagout-seg s-juggling"></div>
+                <div class="tagout-seg s-attention"></div>
+                <div class="tagout-seg s-working"></div>
+              </div>
+              <div class="tagout-chip"><span class="dot"></span>7</div>
+            </div>
+          </div>
+          <div class="label"><strong>7 active</strong>chip 直显 7,条仍按 cap 切 5 段</div>
+        </div>
+        <div class="zoom-cell">
+          <div class="stage">
+            <div class="tab-zoom tagout">
+              <div class="tagout-bar">
+                <div class="tagout-seg s-thinking"></div>
+                <div class="tagout-seg s-needs"></div>
+                <div class="tagout-seg s-working"></div>
+                <div class="tagout-seg s-attention"></div>
+              </div>
+              <div class="tagout-chip is-needs"><span class="dot"></span>4</div>
+            </div>
+          </div>
+          <div class="label"><strong>needs-input</strong>chip 圆点跟着变红</div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <div>
+          <h4>设计语言</h4>
+          <p>条仍是 36pt 宽的段染色 ribbon。Chip 沿水平方向往桌面探,内有圆点 + 数字,用 Geist Mono。Chip 圆点颜色 = 最高优先级 session 状态;数字 = 真实 session 数(不被 cap 限)。Chip 自带 backdrop blur,叠在桌面上不抢戏。</p>
+        </div>
+        <div>
+          <h4>取舍</h4>
+          <ul>
+            <li><strong>+</strong> 两个信息层(状态色 + 数字)各享完整空间</li>
+            <li><strong>−</strong> 增加 hit-test 面积(chip 可被误点)</li>
+            <li><strong>−</strong> macOS NSPanel frame 要扩到 chip 之外,跟现有 36pt 假设不兼容</li>
+            <li><strong>−</strong> 跟全屏 app 有可能视觉打架</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <!-- ====================================================
+         VARIANT 04 — SLATS
+         ==================================================== -->
+    <article class="variant">
+      <header>
+        <div>
+          <div class="codename">VARIANT №04</div>
+          <div class="name"><em>Slats</em></div>
+          <p class="one-line">每个 session 是条内一根细长发光的彩色横线 — 像一组 LED 指示灯。Overflow 表达为"末段更密的一簇线",视觉密度本身就是 count。没有数字,没有圆点。</p>
+        </div>
+        <div class="numero">04</div>
+      </header>
+
+      <div class="desktop">
+        <div class="menu-bar-icons">
+          <span>WIFI</span><span>BAT 91%</span><span>10:32</span>
+        </div>
+        <div class="dock-zone">
+          <div class="tab-native">
+            <div class="slats" style="width:100%;height:100%">
+              <div class="slat s-thinking"></div>
+              <div class="slat s-working"></div>
+              <div class="slat s-juggling"></div>
+              <div class="slat s-attention"></div>
+              <div class="cluster-gap"></div>
+              <div class="slat s-working cluster-extra"></div>
+              <div class="slat s-thinking cluster-extra"></div>
+              <div class="slat s-working cluster-extra"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="zoom-stage">
+        <div class="zoom-cell">
+          <div class="stage">
+            <div class="tab-zoom">
+              <div class="slats" style="width:100%;height:100%">
+                <div class="slat s-idle"></div>
+                <div class="slat s-idle"></div>
+              </div>
+            </div>
+          </div>
+          <div class="label"><strong>2 idle</strong>稀疏 + 灰</div>
+        </div>
+        <div class="zoom-cell">
+          <div class="stage">
+            <div class="tab-zoom">
+              <div class="slats" style="width:100%;height:100%">
+                <div class="slat s-thinking"></div>
+                <div class="slat s-working"></div>
+                <div class="slat s-attention"></div>
+                <div class="slat s-working"></div>
+              </div>
+            </div>
+          </div>
+          <div class="label"><strong>4 active</strong>四根 LED 拉开间距</div>
+        </div>
+        <div class="zoom-cell">
+          <div class="stage">
+            <div class="tab-zoom">
+              <div class="slats" style="width:100%;height:100%">
+                <div class="slat s-thinking"></div>
+                <div class="slat s-working"></div>
+                <div class="slat s-juggling"></div>
+                <div class="slat s-attention"></div>
+                <div class="cluster-gap"></div>
+                <div class="slat s-working cluster-extra"></div>
+                <div class="slat s-thinking cluster-extra"></div>
+                <div class="slat s-working cluster-extra"></div>
+              </div>
+            </div>
+          </div>
+          <div class="label"><strong>7 active</strong>末端密簇 = 溢出</div>
+        </div>
+        <div class="zoom-cell">
+          <div class="stage">
+            <div class="tab-zoom">
+              <div class="slats" style="width:100%;height:100%">
+                <div class="slat s-thinking"></div>
+                <div class="slat s-needs"></div>
+                <div class="slat s-working"></div>
+                <div class="slat s-attention"></div>
+              </div>
+            </div>
+          </div>
+          <div class="label"><strong>needs-input</strong>那根更粗更亮</div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <div>
+          <h4>设计语言</h4>
+          <p>每根 slat 是 1.5pt 高的发光彩条,左右 22% 留白(看着像 LED 装在条内)。Overflow region 用一根 1px dashed 暗线分开,后面的 slat 更窄 + 半透明(53% 不透明)。Needs-input slat 高度 +1pt、亮度 +50%、加发光。整个条的可视语言更"硬件设备"。</p>
+        </div>
+        <div>
+          <h4>取舍</h4>
+          <ul>
+            <li><strong>+</strong> 美学最有性格 — 像一件设备而非 UI</li>
+            <li><strong>+</strong> 数量增长到 10+ 也很优雅(更密)</li>
+            <li><strong>−</strong> 没有具体数字 — 数 session 要看一会儿</li>
+            <li><strong>−</strong> 跟现有 TabGlowOverlay 完全是另一套实现,改造成本最大</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+  </main>
+
+  <!-- COMPARISON FOOTER ===================================== -->
+  <section style="margin-top:88px;padding-top:48px;border-top:1px solid var(--rule)">
+    <div class="kicker" style="font-family:var(--mono);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-fainter);margin-bottom:24px">回到取舍 · summary</div>
+    <h2 style="font-family:var(--serif);font-style:italic;font-weight:400;font-size:40px;line-height:1.1;color:var(--ink);margin:0 0 40px">想想这条 36pt 到底是个什么?</h2>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:32px;font-size:13px;line-height:1.6">
+      <div>
+        <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.15em;color:var(--ink-fainter);text-transform:uppercase;margin-bottom:10px">№01 · Ribbon</div>
+        <p style="color:var(--ink-dim);margin:0">"一根 <em>信息密度</em> 最大的彩色色带" — 沿用、打磨现有方案。改 overflow 段视觉 + 拿掉 <code style="font-family:var(--mono);color:var(--ink)">●N</code>。</p>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.15em;color:var(--ink-fainter);text-transform:uppercase;margin-bottom:10px">№02 · Pill</div>
+        <p style="color:var(--ink-dim);margin:0">"一个 <em>会变色的大数字</em>" — 重心给 N,牺牲每条 session 的状态精度。最远观友好。</p>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.15em;color:var(--ink-fainter);text-transform:uppercase;margin-bottom:10px">№03 · Tag-out</div>
+        <p style="color:var(--ink-dim);margin:0">"<em>条 + 旁挂的 chip</em>" — 接受空间溢出,信息分层最干净。物理空间换了视觉清晰。</p>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:0.15em;color:var(--ink-fainter);text-transform:uppercase;margin-bottom:10px">№04 · Slats</div>
+        <p style="color:var(--ink-dim);margin:0">"<em>一台微型 LED 指示器</em>" — 美学最有性格,改造成本最高,数字感最弱。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footnote">
+    <div>CCBar · Floating Tab Redesign · 内部 mockup,非生产稿</div>
+    <div class="right">render · <a href="#">2026-05-28-floating-tab-redesign-mockups.html</a></div>
+  </footer>
+
+</div>
+</body>
+</html>

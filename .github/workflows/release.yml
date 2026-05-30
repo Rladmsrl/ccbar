@@ -1,0 +1,291 @@
+name: Release
+
+# Trigger: push a semver tag, e.g.
+#   git tag v1.2.0 && git push origin v1.2.0
+#
+# What this does:
+#   1. Writes the tag's version into project.yml (MARKETING_VERSION) and uses the
+#      workflow run number as the build number (CURRENT_PROJECT_VERSION). The app's
+#      Settings ▸ About reads these from the bundle at runtime, so it updates itself.
+#   2. Builds a Release CCBar.app and packages it:
+#        • if the Developer ID signing secrets below are configured -> a SIGNED +
+#          NOTARIZED + stapled DMG;
+#        • otherwise -> an ad-hoc-signed (un-notarized) DMG *and* a .zip. Gatekeeper
+#          warns on first launch; users open via right-click ▸ Open.
+#   3. Creates a GitHub Release for the tag in this repo, with the artifact(s)
+#      attached, downloadable by anyone (the repo is public).
+#   4. If SPARKLE_PRIVATE_ED_KEY is set, EdDSA-signs the archive and publishes an
+#      updated appcast.xml to this repo's gh-pages branch (served at SUFeedURL by
+#      GitHub Pages) so existing installs can auto-update.
+#   5. Commits the bumped project.yml back to master.
+#
+# Optional repository secrets (Settings ▸ Secrets and variables ▸ Actions) — set
+# ALL of these to get a notarized DMG; leave them unset for the zip/un-notarized DMG path:
+#   BUILD_CERTIFICATE_BASE64  Developer ID Application cert exported as .p12, base64-encoded
+#                             (macOS:  base64 -i cert.p12 | pbcopy)
+#   P12_PASSWORD              password set when exporting the .p12
+#   KEYCHAIN_PASSWORD         any string — password for the throwaway CI keychain
+#   APPLE_TEAM_ID             10-character Apple Developer Team ID
+#   NOTARY_APPLE_ID           Apple ID email used for notarization
+#   NOTARY_PASSWORD           app-specific password for that Apple ID (appleid.apple.com)
+#
+# The Release upload and the gh-pages appcast deploy both use the built-in
+# GITHUB_TOKEN (this repo only) — no cross-repo PAT needed.
+#
+# Auto-update secret (independent of the signing secrets above):
+#   SPARKLE_PRIVATE_ED_KEY    base64 EdDSA private key from Sparkle's
+#                             `generate_keys -x <file>`. The matching *public*
+#                             key goes in Info.plist as SUPublicEDKey. Without
+#                             this secret the appcast step is skipped (releases
+#                             still publish, but installed apps won't see them).
+#                             Requires GitHub Pages enabled for this repo's
+#                             gh-pages branch.
+#
+# Git language stats runtime:
+#   The workflow builds a relocatable GitTools runtime from pinned Ruby,
+#   github-linguist, and scc versions before packaging the app. `release-build.sh`
+#   requires LINGUIST_RUNTIME_SOURCE so we never ship a Homebrew-dependent
+#   development wrapper.
+#
+# Note: the final step pushes a commit to `master`. If `master` has branch
+# protection that blocks the built-in GITHUB_TOKEN, either relax it for this
+# workflow or swap in a PAT with `contents: write`.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    # Needs Xcode 26.4+: earlier 26.x ship an `actool` that crashes on the Icon
+    # Composer `AppIcon.icon` bundle ("AssetCatalogAgent closed the connection").
+    # The macos-15 runner image only goes up to 26.3; macos-26 is the first image
+    # that preinstalls 26.4.1 stable.
+    runs-on: macos-26
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v6
+        with:
+          ref: master
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Select Xcode
+        # Pinned, NOT `latest-stable`: the macos-26 image also preinstalls 26.5
+        # beta, which can be removed or replaced without warning. 26.4.1 is the
+        # newest stable Xcode that fixes the Icon Composer actool crash.
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "26.4.1"
+
+      - name: Resolve version from tag
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::tag '$GITHUB_REF_NAME' is not v<MAJOR>.<MINOR>.<PATCH>"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "build=$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
+
+      - name: Detect signing secrets
+        id: signing
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          NOTARY_APPLE_ID: ${{ secrets.NOTARY_APPLE_ID }}
+          NOTARY_PASSWORD: ${{ secrets.NOTARY_PASSWORD }}
+        run: |
+          if [[ -n "$BUILD_CERTIFICATE_BASE64" && -n "$P12_PASSWORD" && -n "$KEYCHAIN_PASSWORD" \
+                && -n "$APPLE_TEAM_ID" && -n "$BUILD_PROVISION_PROFILE_BASE64" \
+                && -n "$NOTARY_APPLE_ID" && -n "$NOTARY_PASSWORD" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "Signing secrets present — will build a notarized DMG."
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Signing secrets absent — will build an un-notarized DMG + zip."
+          fi
+
+      - name: Detect Sparkle EdDSA key
+        id: sparkle
+        env:
+          SPARKLE_PRIVATE_ED_KEY: ${{ secrets.SPARKLE_PRIVATE_ED_KEY }}
+        run: |
+          if [[ -n "$SPARKLE_PRIVATE_ED_KEY" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "SPARKLE_PRIVATE_ED_KEY present — will publish an updated appcast."
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::SPARKLE_PRIVATE_ED_KEY not set — skipping appcast publish; installed apps won't auto-update to this release."
+          fi
+
+      - name: Install build tools
+        run: |
+          set -euo pipefail
+
+          formulae=(xcodegen zig@0.15 ruby-build go cmake pkg-config icu4c openssl@3 readline libyaml gmp)
+          missing=()
+          for formula in "${formulae[@]}"; do
+            if brew list --formula "$formula" >/dev/null 2>&1; then
+              echo "$formula already installed; skipping."
+            else
+              missing+=("$formula")
+            fi
+          done
+
+          if (( ${#missing[@]} > 0 )); then
+            brew install "${missing[@]}"
+          else
+            echo "All Homebrew build tools are already installed."
+          fi
+
+          ZIG_PREFIX="$(brew --prefix zig@0.15)"
+          ZIG_CACHE="$RUNNER_TEMP/zig-cache"
+          mkdir -p "$ZIG_CACHE"
+          echo "ZIG_BIN=$ZIG_PREFIX/bin/zig" >> "$GITHUB_ENV"
+          echo "ZIG_GLOBAL_CACHE_DIR=$ZIG_CACHE" >> "$GITHUB_ENV"
+          "$ZIG_PREFIX/bin/zig" version
+          ZIG_GLOBAL_CACHE_DIR="$ZIG_CACHE" "$ZIG_PREFIX/bin/zig" libc >/dev/null
+
+      - name: Import Developer ID signing certificate
+        if: steps.signing.outputs.enabled == 'true'
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          CERT_PATH="$RUNNER_TEMP/cert.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
+
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o "$CERT_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          security import "$CERT_PATH" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain
+
+          SIGN_IDENTITY="$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" \
+            | awk -F'"' '/Developer ID Application/ {print $2; exit}')"
+          if [[ -z "$SIGN_IDENTITY" ]]; then
+            echo "::error::no 'Developer ID Application' identity found in the imported certificate"
+            exit 1
+          fi
+          echo "SIGN_IDENTITY=$SIGN_IDENTITY" >> "$GITHUB_ENV"
+          rm -f "$CERT_PATH"
+
+      - name: Bump version in project.yml
+        run: bash scripts/bump-version.sh "${{ steps.version.outputs.version }}" "${{ steps.version.outputs.build }}"
+
+      - name: Build GitTools runtime
+        run: |
+          bash scripts/build-gittools-runtime.sh "$RUNNER_TEMP/gittools-runtime"
+          bash scripts/verify-gittools-runtime.sh "$RUNNER_TEMP/gittools-runtime"
+
+      - name: Build app and package artifacts
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_ID: ${{ secrets.NOTARY_APPLE_ID }}
+          APP_PASSWORD: ${{ secrets.NOTARY_PASSWORD }}
+          LINGUIST_RUNTIME_SOURCE: ${{ runner.temp }}/gittools-runtime
+        run: |
+          # Defensive: actool talks to these XPC agents and they can be left in a
+          # bad state after switching Xcode, which crashes asset-catalog compilation.
+          sudo killall -9 com.apple.CoreSimulator.CoreSimulatorService 2>/dev/null || true
+          bash scripts/release-build.sh "${{ steps.version.outputs.version }}"
+
+      - name: Generate release notes from source commits
+        # Build the notes from this repo's commits between this tag and the
+        # previous semver tag (or from the start if this is the first release),
+        # which reads better than GitHub's auto-generated list.
+        # `actions/checkout` with fetch-depth: 0 above fetched all tags.
+        #
+        # We emit two files tuned for different surfaces:
+        #   • release_notes.md   → full GitHub Release body from commit subjects + bodies
+        #   • release_notes.html → compact Sparkle update dialog notes, optionally
+        #     overridden by release-notes/sparkle/<tag>.html or .md
+        run: |
+          set -euo pipefail
+          python3 scripts/generate-release-notes.py \
+            --tag "$GITHUB_REF_NAME" \
+            --markdown-out release_notes.md \
+            --sparkle-html-out release_notes.html
+
+          echo "----- release_notes.md -----"
+          cat release_notes.md
+          echo "----- release_notes.html -----"
+          cat release_notes.html
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: dist/*
+          body_path: release_notes.md
+
+      - name: Build Sparkle appcast
+        if: steps.sparkle.outputs.enabled == 'true'
+        env:
+          SPARKLE_PRIVATE_ED_KEY: ${{ secrets.SPARKLE_PRIVATE_ED_KEY }}
+        run: bash scripts/publish-appcast.sh "${{ steps.version.outputs.version }}" "${{ steps.version.outputs.build }}" "${{ github.ref_name }}"
+
+      - name: Deploy appcast to GitHub Pages
+        if: steps.sparkle.outputs.enabled == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          PAGES_REPO="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          PAGES_DIR="$RUNNER_TEMP/ccbar-pages"
+          rm -rf "$PAGES_DIR"
+
+          if git ls-remote --exit-code --heads "$PAGES_REPO" gh-pages >/dev/null 2>&1; then
+            git clone --depth 1 --branch gh-pages "$PAGES_REPO" "$PAGES_DIR"
+          else
+            git clone --depth 1 "$PAGES_REPO" "$PAGES_DIR"
+            cd "$PAGES_DIR"
+            git checkout --orphan gh-pages
+            git rm -rf . >/dev/null 2>&1 || true
+          fi
+
+          cd "$PAGES_DIR"
+          rsync -a --checksum "$GITHUB_WORKSPACE/_site/" "$PAGES_DIR/"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+
+          if [[ -z "$(git status --porcelain)" ]]; then
+            echo "No GitHub Pages changes to publish."
+            exit 0
+          fi
+
+          git commit -m "chore: publish appcast for $GITHUB_REF_NAME"
+          git push origin gh-pages
+
+      - name: Commit version bump back to master
+        run: |
+          if git diff --quiet -- project.yml; then
+            echo "project.yml unchanged — nothing to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add project.yml
+          git commit -m "chore(release): v${{ steps.version.outputs.version }} [skip ci]"
+          git push origin HEAD:master
+
+      - name: Clean up keychain
+        if: always() && steps.signing.outputs.enabled == 'true'
+        run: security delete-keychain "$RUNNER_TEMP/app-signing.keychain-db" || true
