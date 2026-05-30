@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>CCBar</title>
+    <link>https://rladmsrl.github.io/ccbar/appcast.xml</link>
+    <description>Most recent updates to CCBar.</description>
+    <language>en</language>
+    <item>
+      <title>Version 0.1.1</title>
+      <sparkle:version>3</sparkle:version>
+      <sparkle:shortVersionString>0.1.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[
+<h2>本次更新</h2>
+<ul>
+<li>源码仓库本身就是 public,拆出独立发布仓库的唯一理由(藏私有源码) 不成立。改为全部走 Rladmsrl/ccbar 单仓库:</li>
+<li>Info.plist SUFeedURL → rladmsrl.github.io/ccbar/appcast.xml</li>
+<li>release.yml: 删掉发往 ccbar-releases 的 Release 步骤;appcast 改推本仓库</li>
+<li>gh-pages,用内置 GITHUB_TOKEN(不再需要 RELEASES_REPO_TOKEN PAT)</li>
+<li>publish-appcast.sh / update-appcast.py / generate-release-notes.py:</li>
+<li>repo / feed URL 改指 ccbar</li>
+<li>README / CLAUDE.md: 改成单仓库说明,修正"源码私有"的错误表述</li>
+</ul>
+]]></description>
+      <pubDate>Sat, 30 May 2026 05:29:43 GMT</pubDate>
+      <enclosure url="https://github.com/rladmsrl/ccbar/releases/download/v0.1.1/CCBar-0.1.1.zip" sparkle:edSignature="40UcAwxh23PMzAzF5n8pfksCdqEgAGBaWQQvaBYLpj/S2ZnsMqKxI1ID42/AeooHoGbL1c1dmIKyTzg1Na9KAQ==" length="69107048" type="application/octet-stream"/>
+    </item>
+  </channel>
+</rss>
