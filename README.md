@@ -30,20 +30,31 @@
 
 ## Features
 
-CCBar 从本地的 `~/.claude/` 读 Claude Code 的会话记录,把它变成你随手一瞥就能看到的信息 —— 一个**只为 Claude Code 重度用户**做的、留得住的桌面工具。
+CCBar 从你本地的 `~/.claude/` 里读 Claude Code 的会话记录,把那些藏在终端和 JSON 里的状态,变成抬眼一瞥就懂的东西。它不替你写代码 —— 它替你盯着 Claude,给那些同时开着好几个会话、一天要瞄几十次用量的重度用户。
 
-- **菜单栏标签** —— 当前 5h 窗口剩余时间 / 用量百分比,内容、顺序、显隐都能拖着配;可与 Claude Code statusLine 双向桥接
-- **实时会话 HUD** —— 谁在跑、停在哪、有没有等待权限审批,胶囊状态徽章一目了然,行内就能 Stop / Respawn / Focus 终端标签页
-- **可拖浮窗 (Floating Tab)** —— 把状态钉在屏幕边缘,一条分段色带 = 一排会话;悬停看单会话预览 + 最近事件时间线,点开就是当前会话的操作清单。跨屏不漂回主屏
-- **权限审批气泡 (Permission Bubble)** —— Claude Code 等待批准时从浮窗弹出,Allow / Deny / Always 直接同步回 chat,可配全局快捷键、提示音、勿扰
-- **Token / Cost 统计** —— 按 (message.id, requestId) 跨 session 去重,避免上游惯有的 cost 翻倍;可切成本口径、是否计入 cache
-- **API / 配置切换台 (Switcher)** —— 一键切换 API provider(base URL / key / 模型),管理配置 profile,浏览编辑 AGENTS.md / CLAUDE.md / plans,顺手做 CLI 环境体检
-- **Skills 库** —— 本地 + plugin skills 一览,接入 skills.sh
-- **Git 仓库活动** —— 本地仓库提交图、语言 / SLOC、代码归属
-- **AI 活动时间线** —— 把编辑器活动与 Claude 活动叠在一条时间轴上对比(读本机 Screen Time)
-- **Claude 服务状态** —— 盯着 claude.ai / Claude Code 的运行状态,异常时可选系统通知
-- **内置自动更新** —— Sparkle 后台静默检查 + 设置里手动检查,EdDSA 签名的 appcast
-- **简体中文全量本地化** —— 保留 Skill / Plugin / Subagent 等 Claude 生态术语原文
+### 菜单栏:一眼看完今天还剩多少额度
+
+<img src="docs/assets/menubar-label.png" alt="CCBar 菜单栏标签:成本、时间、用量百分比、5h 窗口剩余" width="360">
+
+当前 5h 窗口的剩余时间和用量百分比,常驻在你菜单栏的最上面。不用点开任何窗口,扫一眼就知道还能跑多久、要不要悠着点。
+
+标签里显示什么、按什么顺序排、什么时候自动藏起来,全都能拖着配成你最顺手的样子;还能跟 Claude Code 的 statusLine 双向桥接 —— 终端里和菜单栏里,看到的是同一份数据。
+
+### 悬浮标签:把"几个 Claude 正在跑"钉在屏幕边上
+
+<img src="docs/assets/floating-tab.png" alt="CCBar 悬浮标签:分段色带,一段一个会话,颜色即状态" width="220">
+
+同时开三五个会话时,最烦的就是不知道哪个在等你、哪个早跑完了。Floating Tab 把所有会话压成屏幕边缘的一条分段色带 —— **一段就是一个会话,颜色直接告诉你它的状态**:在跑、空闲、等你批权限、还是已经收工。
+
+### 还有这些,顺手就在
+
+- **权限审批气泡** —— Claude 卡在"要不要批准"时,从悬浮标签直接弹个气泡,Allow / Deny / Always 一点就同步回 chat;可配全局快捷键(在别的 app 前台也按得动)、提示音、勿扰
+- **Token / Cost 统计** —— 按 (message.id, requestId) 跨 session 去重,不会像上游那样把 cost 算翻倍;成本口径、算不算 cache 都能切
+- **API / 配置切换台** —— 一键换 provider(base URL / key / 模型),管理多套配置 profile,顺手浏览编辑 AGENTS.md / CLAUDE.md / plans,还能做个 CLI 环境体检
+- **Skills 库** —— 本地 + plugin skills 一览,接得上 skills.sh
+- **Git 仓库活动** —— 本地仓库的提交图、语言 / SLOC、代码归属
+- **AI 活动时间线** —— 把你在编辑器里的活动和 Claude 的活动叠在一条轴上对比(读本机 Screen Time)
+- **Claude 服务状态** —— 盯着 claude.ai / Claude Code 在不在线,出问题可选系统通知
 
 ## Install
 
