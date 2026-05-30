@@ -5,5 +5,27 @@
     <link>https://rladmsrl.github.io/ccbar/appcast.xml</link>
     <description>Most recent updates to CCBar.</description>
     <language>en</language>
+    <item>
+      <title>Version 0.1.0</title>
+      <sparkle:version>5</sparkle:version>
+      <sparkle:shortVersionString>0.1.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[
+<h2>CCBar 0.1.0 — 首个公开发布</h2>
+<p>Claude Code 的原生 macOS 菜单栏 app。从本地 `~/.claude/` 读会话数据,把它变成随手一瞥就能看到的信息。</p>
+<h3>主要功能</h3>
+<ul>
+<li>菜单栏标签:5h 用量窗口剩余 / 百分比,可拖拽配置,与 statusLine 双向桥接</li>
+<li>实时会话 HUD:谁在跑、停在哪、是否等待权限审批,行内 Stop / Respawn / Focus</li>
+<li>可拖浮窗:一条分段色带映射所有会话,悬停看单会话预览 + 事件时间线</li>
+<li>权限审批气泡:Claude 等待批准时弹出,Allow / Deny / Always 同步回 chat</li>
+<li>Token / Cost 统计:跨 session 去重,避免 cost 翻倍</li>
+<li>API / 配置切换台:一键切换 provider,管理配置 profile</li>
+</ul>
+<p>需要 macOS 14+。内置 Sparkle 自动更新。</p>
+]]></description>
+      <pubDate>Sat, 30 May 2026 07:58:48 GMT</pubDate>
+      <enclosure url="https://github.com/rladmsrl/ccbar/releases/download/v0.1.0/CCBar-0.1.0.zip" sparkle:edSignature="PKs0S4NeTMq4nRN38J7djs1ZJyWnFGjb3ivpYEv2Wd29dOkJ3LetW3vCXlcfFzxQiXz7NLFhd+yzubTCUcedDA==" length="69107419" type="application/octet-stream"/>
+    </item>
   </channel>
 </rss>
